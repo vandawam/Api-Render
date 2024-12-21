@@ -1,173 +1,149 @@
 import numpy as np
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import LabelEncoder
 
 # Data yang diberikan
 data = [
     {
-        "Bet": {"A": 1, "B": 1, "C": 0},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "A",
-        "Pay": 20
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 1,
+            "Kelapa": 1,
+            "Lonceng": 0,
+            "Semangka": 0,
+            "Bintang": 0,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Jeruk1"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 0,
+            "Kelapa": 0,
+            "Lonceng": 0,
+            "Semangka": 1,
+            "Bintang": 1,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Semangka"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 0,
+            "Kelapa": 1,
+            "Lonceng": 1,
+            "Semangka": 0,
+            "Bintang": 0,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Yes"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": True,
-        "Out": ["A", "B"],
-        "Pay": 20
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 1,
+            "Kelapa": 0,
+            "Lonceng": 0,
+            "Semangka": 0,
+            "Bintang": 0,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Apel"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": True,
-        "scetter": False,
-        "Out": None,
-        "Pay": 200
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 0,
+            "Kelapa": 0,
+            "Lonceng": 0,
+            "Semangka": 0,
+            "Bintang": 1,
+            "Sembilan": 1,
+            "Yes": 0
+        },
+        "out": "Sembilan1"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
+        "bets": {
+            "Apel": 0,
+            "Jeruk": 1,
+            "Kelapa": 1,
+            "Lonceng": 0,
+            "Semangka": 0,
+            "Bintang": 0,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Lonceng"
     },
     {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
-    },
-    {
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
-    },
-    {
-        "Bet": {"A": 0, "B": 1, "C": 0},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 10
-    },{
-        "Bet": {"A": 0, "B": 1, "C": 0},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 10
-    },{
-        "Bet": {"A": 0, "B": 1, "C": 0},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 10
-    },{
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "B",
-        "Pay": 0
-    },{
-        "Bet": {"A": 1, "B": 1, "C": 0},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "C",
-        "Pay": 0
-    },{
-        "Bet": {"A": 1, "B": 0, "C": 1},
-        "jackpot": False,
-        "scetter": False,
-        "Out": "C",
-        "Pay": 5
-    },
+        "bets": {
+            "Apel": 1,
+            "Jeruk": 0,
+            "Kelapa": 0,
+            "Lonceng": 1,
+            "Semangka": 0,
+            "Bintang": 0,
+            "Sembilan": 0,
+            "Yes": 0
+        },
+        "out": "Semangka1"
+    }
 ]
 
 # Preprocessing data
 rows = []
 for entry in data:
-    row = {
-        'Bet_A': entry['Bet']['A'],
-        'Bet_B': entry['Bet']['B'],
-        'Bet_C': entry['Bet']['C'],
-        'jackpot': int(entry['jackpot']),
-        'scetter': int(entry['scetter']),
-        'Pay': entry['Pay']
-    }
-    # Mengubah "Out" menjadi nilai numerik (label encoding sederhana)
-    if entry['Out'] is None:
-        row['Out'] = -1
-    elif isinstance(entry['Out'], list):
-        row['Out'] = len(entry['Out'])  # Panjang list sebagai fitur
-    else:
-        row['Out'] = ord(entry['Out']) - ord('A')  # A=0, B=1, C=2, dll.
+    row = entry["bets"]
+    row["out"] = entry["out"]
     rows.append(row)
 
 # Membuat DataFrame
 df = pd.DataFrame(rows)
+df.fillna(0, inplace=True)  # Mengatasi nama yang salah e.g., "Semangka ", "lonceng"
 
 # Memisahkan fitur dan target
-X = df[['Bet_A', 'Bet_B', 'Bet_C', 'jackpot', 'scetter', 'Pay']]
-y = df['Out']
+X = df.drop("out", axis=1)
+y = df["out"]
+
+# Encoding target
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
 
 # Membuat model
 model = RandomForestClassifier()
-model.fit(X, y)
+model.fit(X, y_encoded)
 
-# Prediksi untuk data baru (dengan probabilitas)
-def predict_next_probabilities(bet_a, bet_b, bet_c, jackpot, scetter, pay):
-    input_data = np.array([[bet_a, bet_b, bet_c, int(jackpot), int(scetter), pay]])
-    probabilities = model.predict_proba(input_data)[0]
-    classes = model.classes_
-
-    # Menghitung persentase prediksi
-    result = {}
-    for i, prob in enumerate(probabilities):
-        if classes[i] == -1:
-            result["None"] = prob * 100
-        elif classes[i] >= 0 and classes[i] < 26:
-            result[chr(classes[i] + ord('A'))] = prob * 100
-        else:
-            result[f"List with {classes[i]} elements"] = prob * 100
-
+# Fungsi prediksi
+def predict_next_probabilities(input_bets):
+    input_df = pd.DataFrame([input_bets])
+    probabilities = model.predict_proba(input_df)[0]
+    classes = label_encoder.inverse_transform(range(len(probabilities)))
+    
+    # Membuat hasil dalam format persentase
+    result = {classes[i]: round(prob * 100, 2) for i, prob in enumerate(probabilities)}
     return result
 
 # Contoh prediksi baru
 new_data = {
-    "Bet_A": 1,
-    "Bet_B": 1,
-    "Bet_C": 0,
-    "jackpot": False,
-    "scetter": True,
-    "Pay": 30
+    "Apel": 1,
+    "Jeruk": 0,
+    "Kelapa": 0,
+    "Lonceng": 1,
+    "Semangka": 0,
+    "Bintang": 0,
+    "Sembilan": 0,
+    "Yes": 0
 }
 
-prediction_probabilities = predict_next_probabilities(
-    new_data['Bet_A'],
-    new_data['Bet_B'],
-    new_data['Bet_C'],
-    new_data['jackpot'],
-    new_data['scetter'],
-    new_data['Pay']
-)
+prediction_probabilities = predict_next_probabilities(new_data)
 
 # Menampilkan hasil prediksi
 for key, value in prediction_probabilities.items():
